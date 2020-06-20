@@ -11,4 +11,6 @@ import java.util.Optional;
 @Repository
 public interface PollRepository extends JpaRepository<Poll, Long> {
     Optional<Poll> findFirstByUserOrderByIdDesc(User user);
+    Optional<Poll> findFirstByUserAndId(User user, Long id);
+    List<Poll> getAllByUser(User user);
 }

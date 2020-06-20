@@ -11,7 +11,7 @@ public interface FieldService {
 
     List<Field> getFields(User user);
 
-    void removeField(User user, String name);
+    void removeField(User user, Long id);
 
-    void updateField(User user, Field field);
+    void updateField(User user, Long id, Field field);
 }

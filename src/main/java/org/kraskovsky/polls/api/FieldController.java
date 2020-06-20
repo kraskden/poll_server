@@ -1,7 +1,6 @@
 package org.kraskovsky.polls.api;
 
 import lombok.extern.slf4j.Slf4j;
-import org.kraskovsky.polls.dto.field.DeleteReqDto;
 import org.kraskovsky.polls.dto.field.FieldDto;
 import org.kraskovsky.polls.dto.field.GetResDto;
 import org.kraskovsky.polls.model.Field;
@@ -51,13 +50,13 @@ public class FieldController {
         return new ResponseEntity<String>("Added successfully", HttpStatus.OK);
     }
 
-    @PostMapping("/delete")
-    public ResponseEntity<String> deleteField(@RequestBody DeleteReqDto reqDto) {
-        if (reqDto.getName() == null) {
-            return new ResponseEntity<String>("Name not provided", HttpStatus.BAD_REQUEST);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteField(@PathVariable(value = "id") Long id) {
+        if (id == null) {
+            return new ResponseEntity<String>("Id not provided", HttpStatus.BAD_REQUEST);
         }
         getUser().ifPresent(user -> {
-           fieldService.removeField(user, reqDto.getName());
+           fieldService.removeField(user, id);
         });
 
         return new ResponseEntity<String>("Deleted", HttpStatus.OK);
@@ -77,15 +76,15 @@ public class FieldController {
         return ResponseEntity.badRequest().body(null);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<String> updateField(@RequestBody FieldDto fieldDto) {
-        if (!isValidDto(fieldDto)) {
+    @PostMapping("/update/{id}")
+    public ResponseEntity<String> updateField(@PathVariable(value = "id") Long id, @RequestBody FieldDto fieldDto) {
+        if (id == null || !isValidDto(fieldDto)) {
             return new ResponseEntity<String>("Bad Request", HttpStatus.BAD_REQUEST);
         }
 
         Field field = fieldFromDto(fieldDto);
         getUser().ifPresent(user -> {
-            fieldService.updateField(user, field);
+            fieldService.updateField(user, id, field);
         });
         return ResponseEntity.ok().body("Updated");
     }
@@ -105,6 +104,8 @@ public class FieldController {
                 dto.getFieldType() != null &&
                 dto.getProperties() != null;
     }
+
+    // TODO: move this methods to FieldDto class
 
     private Field fieldFromDto(FieldDto dto) {
         Field ret = new Field();
@@ -128,6 +129,7 @@ public class FieldController {
     private FieldDto dtoFromField(Field f) {
         FieldDto dto = new FieldDto();
 
+        dto.setId(f.getId());
         dto.setName(f.getName());
         dto.setFieldType(f.getFieldType());
         dto.setIsEnabled(f.getIsActive());

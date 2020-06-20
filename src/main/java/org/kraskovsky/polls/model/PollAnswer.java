@@ -16,6 +16,6 @@ public class PollAnswer extends BaseEntity {
     @JoinColumn(name ="poll_id")
     private Poll poll;
 
-    @OneToMany(mappedBy = "pollAnswer")
+    @OneToMany(mappedBy = "pollAnswer", cascade = CascadeType.ALL)
     private List<FieldAnswer> answers;
 }

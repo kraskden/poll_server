@@ -11,6 +11,8 @@ import java.util.List;
 @Data
 public class FieldDto {
 
+    private Long id;
+
     @NotEmpty
     private String name;
 
