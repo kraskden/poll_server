@@ -13,4 +13,7 @@ public interface UserService {
     Optional<User> findById(Long id);
 
     void deleteById(Long id);
+
+    Boolean changePassword(User user, String current, String updated);
+    void updateProfile(User current, User updated);
 }

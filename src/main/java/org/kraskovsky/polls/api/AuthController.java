@@ -6,7 +6,7 @@ import org.kraskovsky.polls.dto.login.LoginResDto;
 import org.kraskovsky.polls.dto.register.RegisterReqDto;
 import org.kraskovsky.polls.model.User;
 import org.kraskovsky.polls.secure.jwt.JwtTokenProvider;
-import org.kraskovsky.polls.secure.jwt.exception.JwtAuthException;
+import org.kraskovsky.polls.service.EmailService;
 import org.kraskovsky.polls.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,12 +32,14 @@ public class AuthController {
     private final AuthenticationManager authManager;
     private final JwtTokenProvider jwtProvider;
     private final UserService userService;
+    private final EmailService emailService;
 
     @Autowired
-    public AuthController(AuthenticationManager authManager, JwtTokenProvider jwtProvider, UserService userService) {
+    public AuthController(AuthenticationManager authManager, JwtTokenProvider jwtProvider, UserService userService, EmailService emailService) {
         this.authManager = authManager;
         this.jwtProvider = jwtProvider;
         this.userService = userService;
+        this.emailService = emailService;
     }
 
     @PostMapping("login")
@@ -72,6 +74,8 @@ public class AuthController {
                 email, reqDto.getPassword(), reqDto.getFirstName(), reqDto.getLastName(), reqDto.getPhone());
 
         userService.register(user);
+        emailService.sendSimpleMessage(user.getEmail(), "Welcome to the party!",
+                String.format("Login: %s \n Password: %s\n", reqDto.getEmail(), reqDto.getPassword()));
 
         return ResponseEntity.ok().body("User register successfully");
     }

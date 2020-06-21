@@ -5,6 +5,7 @@ import org.kraskovsky.polls.model.User;
 import org.kraskovsky.polls.repository.UserRepository;
 import org.kraskovsky.polls.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -51,5 +52,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public Boolean changePassword(User user, String current, String updated) {
+        String original = user.getPassword();
+
+        if (!BCrypt.checkpw(current, original)) {
+            return false;
+        }
+
+        user.setPassword(passwordEncoder.encode(updated));
+        userRepository.save(user);
+        return true;
+    }
+
+    @Override
+    public void updateProfile(User current, User updated) {
+        current.setEmail(updated.getEmail());
+        current.setFirstName(updated.getFirstName());
+        current.setSecondName(updated.getSecondName());
+        current.setPhone(updated.getPhone());
+
+        userRepository.save(current);
     }
 }

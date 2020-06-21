@@ -10,9 +10,11 @@ import org.kraskovsky.polls.service.FieldService;
 import org.kraskovsky.polls.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/fields/")
 @Slf4j
+@Validated
 public class FieldController {
 
     private final FieldService fieldService;
@@ -34,14 +37,14 @@ public class FieldController {
         this.userService = userService;
     }
 
+    @PostMapping(value = "/test", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void test(@Validated @RequestBody FieldDto fieldDto) {
+        log.info("{}", fieldDto);
+    }
+
     @PostMapping("/add")
     public ResponseEntity<String> addField(@RequestBody @Valid FieldDto fieldDto) {
-
-        if (!isValidDto(fieldDto)) {
-            return new ResponseEntity<String>("Field invalid", HttpStatus.BAD_REQUEST);
-        }
-
-        Field field = fieldFromDto(fieldDto);
+        Field field = fieldDto.toField();
 
         getUser().ifPresent(user -> {
             fieldService.addField(user, field);
@@ -68,7 +71,7 @@ public class FieldController {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             List<FieldDto> fieldDtos =  fieldService.getFields(user).stream()
-                    .map(this::dtoFromField).collect(Collectors.toList());
+                    .map(FieldDto::fromField).collect(Collectors.toList());
             GetResDto res = new GetResDto();
             res.setFields(fieldDtos);
             return ResponseEntity.ok().body(res);
@@ -78,11 +81,11 @@ public class FieldController {
 
     @PostMapping("/update/{id}")
     public ResponseEntity<String> updateField(@PathVariable(value = "id") Long id, @RequestBody FieldDto fieldDto) {
-        if (id == null || !isValidDto(fieldDto)) {
+        if (id == null) {
             return new ResponseEntity<String>("Bad Request", HttpStatus.BAD_REQUEST);
         }
 
-        Field field = fieldFromDto(fieldDto);
+        Field field = fieldDto.toField();
         getUser().ifPresent(user -> {
             fieldService.updateField(user, id, field);
         });
@@ -96,50 +99,4 @@ public class FieldController {
         return userService.findByEmail(details.getUsername());
     }
 
-    // @Valid is not working, no idea why
-    private Boolean isValidDto(FieldDto dto) {
-        return  dto.getName() != null &&
-                dto.getIsEnabled() != null &&
-                dto.getIsRequired() != null &&
-                dto.getFieldType() != null &&
-                dto.getProperties() != null;
-    }
-
-    // TODO: move this methods to FieldDto class
-
-    private Field fieldFromDto(FieldDto dto) {
-        Field ret = new Field();
-
-        ret.setName(dto.getName());
-        ret.setIsActive(dto.getIsEnabled());
-        ret.setIsRequired(dto.getIsRequired());
-        ret.setFieldType(dto.getFieldType());
-
-        List<FieldProperty> properties = dto.getProperties().stream()
-                .map(propName -> {
-                    FieldProperty prop = new FieldProperty();
-                    prop.setField(ret);
-                    prop.setName(propName);
-                    return prop;
-                }).collect(Collectors.toList());
-        ret.setProperties(properties);
-        return ret;
-    }
-
-    private FieldDto dtoFromField(Field f) {
-        FieldDto dto = new FieldDto();
-
-        dto.setId(f.getId());
-        dto.setName(f.getName());
-        dto.setFieldType(f.getFieldType());
-        dto.setIsEnabled(f.getIsActive());
-        dto.setIsRequired(f.getIsRequired());
-
-        List<String> props = f.getProperties().stream()
-                .map(FieldProperty::getName).collect(Collectors.toList());
-
-        dto.setProperties(props);
-
-        return dto;
-    }
 }
