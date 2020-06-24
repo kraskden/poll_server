@@ -65,16 +65,30 @@ public class FieldController {
         return new ResponseEntity<String>("Deleted", HttpStatus.OK);
     }
 
+    private GetResDto getFieldsForUser(User user) {
+        List<FieldDto> fieldDtos =  fieldService.getFields(user).stream()
+                .map(FieldDto::fromField).collect(Collectors.toList());
+        GetResDto res = new GetResDto();
+        res.setFields(fieldDtos);
+        return res;
+    }
+
     @GetMapping("/")
     public ResponseEntity<GetResDto> getFields() {
         Optional<User> optionalUser =  getUser();
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            List<FieldDto> fieldDtos =  fieldService.getFields(user).stream()
-                    .map(FieldDto::fromField).collect(Collectors.toList());
-            GetResDto res = new GetResDto();
-            res.setFields(fieldDtos);
-            return ResponseEntity.ok().body(res);
+            return ResponseEntity.ok().body(getFieldsForUser(user));
+        }
+        return ResponseEntity.badRequest().body(null);
+    }
+
+    @GetMapping("/poll/{id}")
+    public  ResponseEntity<GetResDto> getFieldsForPoll(@PathVariable(value = "id") Long pollOwnerId) {
+        Optional<User> optionalUser = userService.findById(pollOwnerId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return ResponseEntity.ok().body(getFieldsForUser(user));
         }
         return ResponseEntity.badRequest().body(null);
     }

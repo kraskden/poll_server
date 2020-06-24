@@ -1,10 +1,7 @@
 package org.kraskovsky.polls.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.kraskovsky.polls.model.Field;
-import org.kraskovsky.polls.model.FieldProperty;
-import org.kraskovsky.polls.model.Poll;
-import org.kraskovsky.polls.model.User;
+import org.kraskovsky.polls.model.*;
 import org.kraskovsky.polls.repository.FieldPropertyRepository;
 import org.kraskovsky.polls.repository.FieldRepository;
 import org.kraskovsky.polls.repository.PollRepository;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +36,7 @@ public class FieldServiceImpl implements FieldService {
 
     private void migratePoll(Poll oldPoll, Poll newPoll) {
         List<Field> newList = new ArrayList<>();
+        oldPoll.getFields().sort(Comparator.comparing(BaseEntity::getId));
         for (Field f : oldPoll.getFields()) {
             Field newField = new Field(
                     f.getName(),
@@ -86,7 +85,7 @@ public class FieldServiceImpl implements FieldService {
     public List<Field> getFields(User user) {
         Optional<Poll> poll = pollService.getLastPoll(user);
         if (poll.isPresent()) {
-            return fieldRepository.findAllByPoll(poll.get());
+            return fieldRepository.findAllByPollOrderById(poll.get());
         } else {
             return new ArrayList<>();
         }
@@ -114,6 +113,7 @@ public class FieldServiceImpl implements FieldService {
                 field.setPoll(lastPoll);
                 field.setId(updField.getId());
                 fieldRepository.save(field);
+
             });
             return;
         }

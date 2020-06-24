@@ -1,6 +1,7 @@
 package org.kraskovsky.polls.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.utility.RandomString;
 import org.kraskovsky.polls.model.User;
 import org.kraskovsky.polls.repository.UserRepository;
 import org.kraskovsky.polls.service.UserService;
@@ -52,6 +53,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public String resetPassword(User user) {
+        String newPassword = RandomString.make(10);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return newPassword;
     }
 
     @Override

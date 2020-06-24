@@ -3,6 +3,7 @@ package org.kraskovsky.polls.api;
 import lombok.extern.slf4j.Slf4j;
 import org.kraskovsky.polls.dto.login.LoginReqDto;
 import org.kraskovsky.polls.dto.login.LoginResDto;
+import org.kraskovsky.polls.dto.recover.PasswordRecoverDto;
 import org.kraskovsky.polls.dto.register.RegisterReqDto;
 import org.kraskovsky.polls.model.User;
 import org.kraskovsky.polls.secure.jwt.JwtTokenProvider;
@@ -78,6 +79,18 @@ public class AuthController {
                 String.format("Login: %s \n Password: %s\n", reqDto.getEmail(), reqDto.getPassword()));
 
         return ResponseEntity.ok().body("User register successfully");
+    }
+
+    @PostMapping("resetPassword")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody PasswordRecoverDto recoverDto) {
+        Optional<User> optionalUser =  userService.findByEmail(recoverDto.getEmail());
+        if (optionalUser.isEmpty()) {
+            return new ResponseEntity<>("No such user", HttpStatus.BAD_REQUEST);
+        }
+        String newPassword = userService.resetPassword(optionalUser.get());
+        emailService.sendSimpleMessage(recoverDto.getEmail(), "Reset Password",
+                String.format("New password:\n%s", newPassword ));
+        return new ResponseEntity<>("Password has been reseted and sended to email", HttpStatus.OK);
     }
 
 }

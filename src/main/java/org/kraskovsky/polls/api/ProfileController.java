@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -61,6 +58,17 @@ public class ProfileController {
         } else {
             return new ResponseEntity<>("Invalid password", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/")
+    ResponseEntity<ProfileDto> getProfileInfo() {
+        Optional<User> optionalUser =  getUser();
+        if (optionalUser.isEmpty()) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+        User user = optionalUser.get();
+
+        return new ResponseEntity<>(ProfileDto.fromUser(optionalUser.get()), HttpStatus.OK);
     }
 
     private Optional<User> getUser() {

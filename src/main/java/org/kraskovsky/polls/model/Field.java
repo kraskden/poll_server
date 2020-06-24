@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Entity
@@ -16,14 +17,14 @@ public class Field extends BaseEntity {
     @NotBlank
     private String name;
 
-    @NotBlank
+    @NotNull
     private Boolean isRequired;
 
-    @NotBlank
+    @NotNull
     private Boolean isActive;
 
     @Enumerated(EnumType.STRING)
-    @NotBlank
+    @NotNull
     private FieldType fieldType;
 
     @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)

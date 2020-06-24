@@ -11,6 +11,8 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class ProfileDto {
 
+    private Long id;
+
     @NotBlank
     @Email
     private String email;
@@ -27,5 +29,15 @@ public class ProfileDto {
         user.setSecondName(this.lastName);
 
         return user;
+    }
+
+    public static ProfileDto fromUser(User user) {
+        return new ProfileDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getSecondName(),
+                user.getPhone()
+        );
     }
 }

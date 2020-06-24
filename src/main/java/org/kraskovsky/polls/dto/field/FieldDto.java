@@ -2,6 +2,7 @@ package org.kraskovsky.polls.dto.field;
 
 import lombok.Data;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.kraskovsky.polls.model.Field;
 import org.kraskovsky.polls.model.FieldProperty;
 import org.kraskovsky.polls.model.FieldType;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
+@Slf4j
 public class FieldDto {
 
     private Long id;

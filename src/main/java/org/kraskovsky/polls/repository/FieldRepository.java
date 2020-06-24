@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface FieldRepository extends JpaRepository<Field, Long> {
-    List<Field>  findAllByPoll(Poll poll);
+    List<Field>  findAllByPollOrderById(Poll poll);
     Optional<Field> findFirstByIdAndPoll(Long Id, Poll poll);
     void removeFieldByPollAndId(Poll poll, Long id);
 }
