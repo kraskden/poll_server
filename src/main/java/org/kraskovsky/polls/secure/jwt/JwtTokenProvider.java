@@ -28,6 +28,9 @@ public class JwtTokenProvider {
     @Value("${jwt.token.secret}")
     private String secret;
 
+    @Value("${jwt.token.validity}")
+    private Long validity;
+
     private JwtUserDetailService userDetailsService;
 
     @Bean
@@ -38,9 +41,13 @@ public class JwtTokenProvider {
     public String createToken(Long id) {
         Claims claims = Jwts.claims().setSubject(id.toString());
 
+        Date now = new Date();
+        Date validityDate = new Date(now.getTime() + this.validity);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
+                .setExpiration(validityDate)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
@@ -77,7 +84,10 @@ public class JwtTokenProvider {
 
     public void validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            Jws<Claims> claimsJws =  Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            if (claimsJws.getBody().getExpiration().before(new Date())) {
+                throw new JwtAuthException("Jwt token is expired");
+            }
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtAuthException("Jwt token is invalid");
         }
