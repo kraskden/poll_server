@@ -6,6 +6,8 @@ import org.kraskovsky.polls.model.User;
 import org.kraskovsky.polls.repository.UserRepository;
 import org.kraskovsky.polls.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,5 +85,13 @@ public class UserServiceImpl implements UserService {
         current.setPhone(updated.getPhone());
 
         userRepository.save(current);
+    }
+
+    @Override
+    public Optional<User> getUserFromSecurityContext() {
+        Object obj = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails details = (UserDetails)obj;
+
+        return this.findByEmail(details.getUsername());
     }
 }

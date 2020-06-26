@@ -18,4 +18,6 @@ public interface UserService {
 
     Boolean changePassword(User user, String current, String updated);
     void updateProfile(User current, User updated);
+
+    Optional<User> getUserFromSecurityContext();
 }

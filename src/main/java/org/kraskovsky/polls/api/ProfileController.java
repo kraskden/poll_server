@@ -30,7 +30,7 @@ public class ProfileController {
 
     @PostMapping("/update")
     ResponseEntity<String> updateProfile(@RequestBody @Valid ProfileDto profileDto) {
-        Optional<User> optionalUser =  getUser();
+        Optional<User> optionalUser =  userService.getUserFromSecurityContext();
         if (optionalUser.isEmpty()) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
@@ -42,7 +42,7 @@ public class ProfileController {
 
     @PostMapping("/passChange")
     ResponseEntity<String> changePassword(@RequestBody @Valid PasswordDto passwordDto) {
-        Optional<User> optionalUser =  getUser();
+        Optional<User> optionalUser =  userService.getUserFromSecurityContext();
         if (optionalUser.isEmpty()) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
@@ -62,7 +62,7 @@ public class ProfileController {
 
     @GetMapping("/")
     ResponseEntity<ProfileDto> getProfileInfo() {
-        Optional<User> optionalUser =  getUser();
+        Optional<User> optionalUser =  userService.getUserFromSecurityContext();
         if (optionalUser.isEmpty()) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
@@ -71,10 +71,5 @@ public class ProfileController {
         return new ResponseEntity<>(ProfileDto.fromUser(optionalUser.get()), HttpStatus.OK);
     }
 
-    private Optional<User> getUser() {
-        Object obj = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetails details = (UserDetails)obj;
 
-        return userService.findByEmail(details.getUsername());
-    }
 }

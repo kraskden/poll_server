@@ -32,7 +32,7 @@ public class PollController {
 
     @GetMapping("/all")
     ResponseEntity<List<PollDto>> getPolls() {
-        Optional<User> user = getUser();
+        Optional<User> user = userService.getUserFromSecurityContext();
         if (user.isEmpty()) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
@@ -41,10 +41,4 @@ public class PollController {
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    private Optional<User> getUser() {
-        Object obj = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetails details = (UserDetails)obj;
-
-        return userService.findByEmail(details.getUsername());
-    }
 }

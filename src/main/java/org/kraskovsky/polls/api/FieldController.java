@@ -46,7 +46,7 @@ public class FieldController {
     public ResponseEntity<String> addField(@RequestBody @Valid FieldDto fieldDto) {
         Field field = fieldDto.toField();
 
-        getUser().ifPresent(user -> {
+        userService.getUserFromSecurityContext().ifPresent(user -> {
             fieldService.addField(user, field);
         });
 
@@ -58,7 +58,7 @@ public class FieldController {
         if (id == null) {
             return new ResponseEntity<String>("Id not provided", HttpStatus.BAD_REQUEST);
         }
-        getUser().ifPresent(user -> {
+        userService.getUserFromSecurityContext().ifPresent(user -> {
            fieldService.removeField(user, id);
         });
 
@@ -75,7 +75,7 @@ public class FieldController {
 
     @GetMapping("/")
     public ResponseEntity<GetResDto> getFields() {
-        Optional<User> optionalUser =  getUser();
+        Optional<User> optionalUser = userService.getUserFromSecurityContext();
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             return ResponseEntity.ok().body(getFieldsForUser(user));
@@ -100,17 +100,11 @@ public class FieldController {
         }
 
         Field field = fieldDto.toField();
-        getUser().ifPresent(user -> {
+        userService.getUserFromSecurityContext().ifPresent(user -> {
             fieldService.updateField(user, id, field);
         });
         return ResponseEntity.ok().body("Updated");
     }
-
-    private Optional<User> getUser() {
-        Object obj = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetails details = (UserDetails)obj;
-
-        return userService.findByEmail(details.getUsername());
-    }
+    
 
 }

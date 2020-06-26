@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.kraskovsky.polls.secure.jwt.exception.JwtAuthException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -51,9 +52,15 @@ public class JwtTokenProvider {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
     }
 
+    public Optional<String> resolveBearer(String token) {
+        if (token != null && token.startsWith("Bearer")) {
+            return Optional.of(token.substring(7, token.length()));
+        }
+        return Optional.empty();
+    }
+
     public Optional<String> resolveToken(HttpServletRequest req) {
         String token = req.getHeader("Authorization");
-        log.info("TOKEN {}", token);
         if (token != null && token.startsWith("Bearer")) {
             return Optional.of(token.substring(7, token.length()));
         }
@@ -70,7 +77,7 @@ public class JwtTokenProvider {
 
 
     @Autowired
-    public void setUserDetailsService(UserDetailsService userDetailsService) {
+    public void setUserDetailsService(@Qualifier("jwtUserDetailService") UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 }
