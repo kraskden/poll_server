@@ -34,4 +34,13 @@ public class JwtUserDetailService implements UserDetailsService {
 
         return JwtUser.buildFromUser(u.get());
     }
+
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+        Optional<User> u = userService.findById(id);
+        if (u.isEmpty()) {
+            throw new UsernameNotFoundException("User " + id.toString() + " not found");
+        }
+
+        return JwtUser.buildFromUser(u.get());
+    }
 }

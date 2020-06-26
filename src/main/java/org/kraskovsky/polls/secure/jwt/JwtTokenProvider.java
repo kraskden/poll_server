@@ -2,6 +2,7 @@ package org.kraskovsky.polls.secure.jwt;
 
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
+import org.kraskovsky.polls.secure.JwtUserDetailService;
 import org.kraskovsky.polls.secure.jwt.exception.JwtAuthException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +28,15 @@ public class JwtTokenProvider {
     @Value("${jwt.token.secret}")
     private String secret;
 
-    private UserDetailsService userDetailsService;
+    private JwtUserDetailService userDetailsService;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    public String createToken(String username) {
-        Claims claims = Jwts.claims().setSubject(username);
+    public String createToken(Long id) {
+        Claims claims = Jwts.claims().setSubject(id.toString());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -44,8 +46,14 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getPayload(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        String payload = getPayload(token);
+        try {
+            Long id = Long.parseLong(payload);
+            UserDetails userDetails = this.userDetailsService.loadUserById(id);
+            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        } catch (NumberFormatException e) {
+            throw new UsernameNotFoundException("User not found");
+        }
     }
 
     public String getPayload(String token) {
@@ -77,7 +85,7 @@ public class JwtTokenProvider {
 
 
     @Autowired
-    public void setUserDetailsService(@Qualifier("jwtUserDetailService") UserDetailsService userDetailsService) {
+    public void setUserDetailsService(JwtUserDetailService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 }
