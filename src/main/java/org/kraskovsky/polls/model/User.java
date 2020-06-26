@@ -6,6 +6,7 @@ import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
                 "username"
         })
 })
-@lombok.Data
+@Data
 public class User extends BaseEntity {
     @NaturalId
     @NotBlank
@@ -31,6 +32,7 @@ public class User extends BaseEntity {
     private String firstName;
     private String secondName;
 
+    @Pattern(regexp = "\\+?[0-9]{2,20}")
     private String phone;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

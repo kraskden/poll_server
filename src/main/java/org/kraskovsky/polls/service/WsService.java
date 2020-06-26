@@ -8,4 +8,6 @@ public interface WsService {
     void sendMsg(User user, String dest, Object payload);
 
     void sendAnswerToUser(User user, Map<String, String> answer);
+
+    void sendMasterPollChangeNotification(User user);
 }

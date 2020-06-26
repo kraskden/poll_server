@@ -5,32 +5,6 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
          http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd">
 
-<!--    <changeSet id="1.0.0" author="kraskden">-->
-<!--        <createTable tableName="users">-->
-<!--            <column name="id" type="BIGINT" autoIncrement="true">-->
-<!--                <constraints primaryKey="true" nullable="false" />-->
-<!--            </column>-->
-
-<!--            <column name="email" type="VARCHAR(255)">-->
-<!--                <constraints unique="true" nullable="false"/>-->
-<!--            </column>-->
-
-<!--            <column name="password" type="VARCHAR(255)">-->
-<!--                <constraints nullable="false" />-->
-<!--            </column>-->
-
-<!--            <column name="firstName" type="VARCHAR(255)">-->
-<!--                <constraints nullable="true" />-->
-<!--            </column>-->
-
-<!--            <column name="secondName" type="VARCHAR(255)">-->
-<!--                <constraints nullable="true" />-->
-<!--            </column>-->
-
-<!--            <column name="phone" type="VARCHAR(255)">-->
-<!--                <constraints nullable="true" />-->
-<!--            </column>-->
-<!--        </createTable>-->
-<!--    </changeSet>-->
+    <include file="classpath:/liquibase/db.initschema.changelog.xml" />
 
 </databaseChangeLog>

@@ -4,16 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.kraskovsky.polls.dto.field.FieldDto;
 import org.kraskovsky.polls.dto.field.GetResDto;
 import org.kraskovsky.polls.model.Field;
-import org.kraskovsky.polls.model.FieldProperty;
 import org.kraskovsky.polls.model.User;
 import org.kraskovsky.polls.service.FieldService;
 import org.kraskovsky.polls.service.UserService;
+import org.kraskovsky.polls.service.WsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,11 +28,13 @@ public class FieldController {
 
     private final FieldService fieldService;
     private final UserService userService;
+    private final WsService wsService;
 
     @Autowired
-    public FieldController(FieldService fieldService, UserService userService) {
+    public FieldController(FieldService fieldService, UserService userService, WsService wsService) {
         this.fieldService = fieldService;
         this.userService = userService;
+        this.wsService = wsService;
     }
 
     @PostMapping(value = "/test", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -48,6 +48,8 @@ public class FieldController {
 
         userService.getUserFromSecurityContext().ifPresent(user -> {
             fieldService.addField(user, field);
+            // Inform user that poll change
+            wsService.sendMasterPollChangeNotification(user);
         });
 
         return new ResponseEntity<String>("Added successfully", HttpStatus.OK);
@@ -60,6 +62,7 @@ public class FieldController {
         }
         userService.getUserFromSecurityContext().ifPresent(user -> {
            fieldService.removeField(user, id);
+           wsService.sendMasterPollChangeNotification(user);
         });
 
         return new ResponseEntity<String>("Deleted", HttpStatus.OK);
@@ -102,6 +105,7 @@ public class FieldController {
         Field field = fieldDto.toField();
         userService.getUserFromSecurityContext().ifPresent(user -> {
             fieldService.updateField(user, id, field);
+            wsService.sendMasterPollChangeNotification(user);
         });
         return ResponseEntity.ok().body("Updated");
     }
